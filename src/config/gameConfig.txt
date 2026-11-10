@@ -1,0 +1,7 @@
+10
+2 Evil
+1 Don
+1 Comissar
+1 Lover
+1 Doctor
+4 Good

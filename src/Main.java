@@ -1,7 +1,6 @@
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Random;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.*;
 
 interface checking {
     public boolean check(Player player);
@@ -32,24 +31,43 @@ class BotRandom extends Player {
 }
 
 class Game {
-    private List<String> roleSet = new ArrayList<>();
+    private Random random = new Random(1);
     private int cnt;
+    private List<String> wakeOrder = new ArrayList<>();
     private List<PlayerWrapper> playersWrappers;
     private List<Player> players;
     private Cond cond = new Cond();
     private RecordsObj records = new RecordsObj();
     private int dayCnt = 1;
-
-    public Game(int n) {
-        cnt = n;
+    private Path pathConfig = Path.of("config/gameConfig.txt");
+    private Path pathWakeOrder = Path.of("config/gameWakeOrder.txt");
+    private Scanner scanner = new Scanner(pathConfig);
+    public Game() throws IOException {
+        cnt = scanner.nextInt();
         playersWrappers = new ArrayList<PlayerWrapper>();
-        for (int i = 0; i < cnt; i++) {
-            Player p1 = new Player("Player " + i, "mir", "good");
-            playersWrappers.add(new PlayerWrapper(p1, new Good(p1)));
+        while (scanner.hasNextInt()) {
+            int n = scanner.nextInt();
+            String roleS = scanner.next();
+            for (int i = 0; i < n; i++) {
+                Role role = Role.parseRole(roleS);
+                Player p1 = new Player("Player", roleS, role.getAlignment());
+                role.setPlayer(p1);
+                role.setPlayerGameStatus(new PlayerGameStatus(p1));
+                PlayerWrapper pw = new PlayerWrapper(p1, role);
+                playersWrappers.add(pw);
+            }
         }
         players = new ArrayList<>();
-        for (PlayerWrapper p : playersWrappers) {
-            players.add(p.getPlayer());
+        Collections.shuffle(playersWrappers, random);
+        for (int i = 0; i < cnt; i++) {
+            playersWrappers.get(i).getPlayer().setName("Player " + i);
+            players.add(playersWrappers.get(i).getPlayer());
+        }
+        scanner.close();
+        scanner = new Scanner(pathWakeOrder);
+        while (scanner.hasNext()) {
+            String roleS = scanner.next();
+            wakeOrder.add(roleS);
         }
     }
     public PlayerWrapper getPlayerWrapper(Player player) {
@@ -86,8 +104,9 @@ class Game {
     }
 
     public void morning() {
-        for (Player player : players) {
-            player.makeAccusations();
+        for (PlayerWrapper playerWrapper : playersWrappers) {
+            playerWrapper.getPlayerGameStatus().morningRoutine();
+            playerWrapper.getPlayer().makeAccusations();
         }
     }
 
@@ -172,7 +191,7 @@ class Game {
     public int aliveEvilCounter(){
         int aliveCnt = 0;
         for (Player player : players) {
-            if (player.isAlive()&&player.getAlignment()=="evil") {
+            if (player.isAlive()&& Objects.equals(player.getAlignment(), "evil")) {
                 aliveCnt++;
             }
         }
@@ -213,8 +232,8 @@ class Cond {
 
 
 class Main {
-    public static void main(String[] args) {
-        Game game = new Game(10);
+    public static void main(String[] args) throws IOException {
+        Game game = new Game();
         game.play();
     }
 }

@@ -55,10 +55,13 @@ class Player {
         return null;
     }
 
-    public String getName() {
+    final public String getName() {
         return name;
     }
-    public String getAlignment() {
+    final public void setName(String newName) {
+        this.name = newName;
+    }
+    final public String getAlignment() {
         return alignment;
     }
 
@@ -81,4 +84,7 @@ class Player {
         return null;
     }
     public void getRoleUsed(String info) {}
+    public String getRole() {
+        return role;
+    }
 }
