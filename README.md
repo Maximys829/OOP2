@@ -9,6 +9,6 @@ Role and Player are wrapped in a PlayerWrapper that is used by the Game to call 
 Also there are RecordsObj and RecordObj classes that have information that Player class have access to.
 Also there is supporting class Cond to help Game track phase of the game.
 Also there is a class GameLog that made specifically for a master of the game. It is logging every meaningful activation of ability.
-Directory config has 2 files for list of quantity and types of all roles in the game and list of awakening order in the night
+Directory config has 2 files for list of quantity and types of all roles in the game and list of awakening order in the night.
 BotRandom is a simple subclass of a Player that acts purely randomly.
 
