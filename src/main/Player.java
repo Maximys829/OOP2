@@ -35,8 +35,14 @@ public abstract class Player {
     }
 
     public void updateStatuses(RecordsObj records) {
-        for (RecordObj record : records.records) {
+        for (Status status : statuses) {
+            for (RecordObj record : records.getDeathRecords()) {
+                if(record.getPlayer1().equals(status.getName())) {
+                    status.setAlive(false);
+                }
+            }
         }
+
     }
 
     public void updateSuspicion(Status st) {

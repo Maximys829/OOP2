@@ -7,11 +7,12 @@ public class RecordsObj {
     List<RecordObj> records;
     List<RecordObj> recordsNoms;
     List<RecordObj> recordsAccuses;
-
+    List<RecordObj> recordsDeaths;
     public RecordsObj() {
         records = new ArrayList<>();
         recordsNoms = new ArrayList<>();
         recordsAccuses = new ArrayList<>();
+        recordsDeaths = new ArrayList<>();
     }
 
     public void addRecord(String type, String p1, double x, String p2) {
@@ -24,6 +25,8 @@ public class RecordsObj {
             case "accusation":
                 recordsAccuses.add(record);
                 break;
+            case "death":
+                recordsDeaths.add(record);
         }
     }
 
@@ -37,6 +40,12 @@ public class RecordsObj {
 
     public List<RecordObj> getAccuseRecords() {
         return recordsAccuses;
+    }
+    public List<RecordObj> getDeathRecords() {
+        return recordsDeaths;
+    }
+    public Boolean playerIsDead(String name){
+        return recordsDeaths.contains(new RecordObj("death", name, 0, ""));
     }
 }
 
@@ -67,5 +76,13 @@ class RecordObj {
 
     public double getScore() {
         return score;
+    }
+    @Override
+    public boolean equals(Object o){
+        if(o instanceof RecordObj){
+            return ((RecordObj) o).getType().equals(this.type)&&((RecordObj) o).getPlayer1().equals(this.player1)
+                    &&((RecordObj) o).getPlayer2().equals(this.player2)&&((RecordObj) o).getScore() == this.score;
+        }
+        return false;
     }
 }

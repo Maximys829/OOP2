@@ -16,7 +16,7 @@ public class BotRandom extends Player {
     }
     public void getRoleUsed(String info) {
         List<String> parts = Arrays.asList(info.split(" "));
-        switch (parts.get(0)) {
+        switch (parts.getFirst()) {
             case "evil:":
                 for (int i = 1; i < parts.size() - 1; i++) {
                     for(Status st:getStatuses()){
@@ -33,7 +33,8 @@ public class BotRandom extends Player {
         for(Status status: getStatuses()){
             if(!status.getName().equals(getName())&&status.isAlive()&&status.getSuspicion()>-0.99){
                 statusesPriority.add(status);
-            } else {
+                //System.out.println(status.getName()+" "+status.getSuspicion());
+            } else if (!status.getName().equals(getName())&&status.isAlive()){
                 statusesNotPriority.add(status);
             }
         }

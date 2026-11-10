@@ -97,11 +97,11 @@ public abstract class Role{
 
 class Comissar extends Role{
     Comissar(){super();
-        setRole("main.Comissar");
+        setRole("Comissar");
         setAlignment("good");}
     Comissar(Player player){
         super( player);
-        setRole("main.Comissar");
+        setRole("Comissar");
         setAlignment("good");
     }
     public String activateRole(List<PlayerWrapper> playersWrappers) {
@@ -111,11 +111,11 @@ class Comissar extends Role{
     }
 }
 class Don extends Role{
-    Don(){super();setRole("main.Don");
+    Don(){super();setRole("Don");
         setAlignment("evil");}
     Don( Player player){
         super( player);
-        setRole("main.Don");
+        setRole("Don");
         setAlignment("evil");
     }
     public String activateRole(List<PlayerWrapper> playersWrappers) {
@@ -125,31 +125,31 @@ class Don extends Role{
     }
 }
 class Evil extends Role{
-    Evil(){super();setRole("main.Evil");
+    Evil(){super();setRole("Evil");
         setAlignment("evil");}
     Evil(Player player){
         super( player);
-        setRole("main.Evil");
+        setRole("Evil");
         setAlignment("evil");
     }
     public String activateRole(List<PlayerWrapper> playersWrappers) {return "";}
 }
 class Good extends Role{
-    Good(){super();setRole("main.Good");
+    Good(){super();setRole("Good");
         setAlignment("good");}
     Good(Player player){
         super(player);
-        setRole("main.Good");
+        setRole("Good");
         setAlignment("good");
     }
     public String activateRole(List<PlayerWrapper> playersWrappers) {return "";}
 }
 class Doctor extends Role{
-    Doctor(){super();setRole("main.Doctor");
+    Doctor(){super();setRole("Doctor");
         setAlignment("good");}
     Doctor(Player player){
         super( player);
-        setRole("main.Doctor");
+        setRole("Doctor");
         setAlignment("good");
     }
     public String activateRole(List<PlayerWrapper> playersWrappers) {
@@ -158,11 +158,11 @@ class Doctor extends Role{
     }
 }
 class Lover extends Role{
-    Lover(){super();setRole("main.Lover");
+    Lover(){super();setRole("Lover");
         setAlignment("good");}
     Lover(Player player){
         super( player);
-        setRole("main.Lover");
+        setRole("Lover");
         setAlignment("good");
     }
     public String activateRole(List<PlayerWrapper> playersWrappers) {
