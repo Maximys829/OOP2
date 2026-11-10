@@ -1,7 +1,9 @@
+package main;
+
 import java.util.ArrayList;
 import java.util.List;
 
-class RecordsObj {
+public class RecordsObj {
     List<RecordObj> records;
     List<RecordObj> recordsNoms;
     List<RecordObj> recordsAccuses;

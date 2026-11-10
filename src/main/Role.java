@@ -1,6 +1,23 @@
-import java.util.List;
+package main;
 
-abstract class Role{
+import java.util.List;
+interface checking {
+    public boolean check(Player player);
+}
+
+interface saving {
+    public void save(Player player);
+}
+
+interface whoring {
+    public void smh(Player player);
+}
+
+interface killing {
+    public void kill(Player player);
+}
+
+public abstract class Role{
     private String alignment;
     private String role;
     private Player player;
@@ -10,12 +27,12 @@ abstract class Role{
         this.status = new PlayerGameStatus(player);
     }
     Role(){}
-    final public void tryToActivateRole(List<PlayerWrapper> playersWrappers){
+    final public void tryToActivateRole(List<PlayerWrapper> playersWrappers, GameLog log){
         if(this.getPlayerGameStatus().isHealthy()&&this.getPlayerGameStatus().isAlive()){
-            activateRole(playersWrappers);
+            log.addLog(activateRole(playersWrappers));
         }
     }
-    abstract public void activateRole(List<PlayerWrapper> playersWrappers);
+    abstract public String activateRole(List<PlayerWrapper> playersWrappers);
     public Player getPlayer(){
         return player;
     }
@@ -57,6 +74,14 @@ abstract class Role{
         }
         return null;
     }
+    static public Player getPlayerFromName(String name, List<PlayerWrapper> playersWrappers){
+        for(PlayerWrapper playerWrapper : playersWrappers){
+            if(playerWrapper.getPlayer().getName().equals(name)){
+                return playerWrapper.getPlayer();
+            }
+        }
+        return null;
+    }
     final public PlayerWrapper getPlayerWrapper(Player player, List<PlayerWrapper> playersWrappers) {
         for (PlayerWrapper p : playersWrappers) {
             if (p.getPlayer().equals(player)) {
@@ -66,83 +91,83 @@ abstract class Role{
         return null;
     }
     final public PlayerWrapper getTargetPlayerWrapper(List<PlayerWrapper> playersWrappers) {
-        return getPlayerWrapper((Player)this.getPlayer().getRoleUsed(), playersWrappers);
+        return getPlayerWrapper(getPlayerFromName(this.getPlayer().getRoleUsed(), playersWrappers), playersWrappers);
     }
 }
 
 class Comissar extends Role{
     Comissar(){super();
-        setRole("Comissar");
+        setRole("main.Comissar");
         setAlignment("good");}
     Comissar(Player player){
         super( player);
-        setRole("Comissar");
+        setRole("main.Comissar");
         setAlignment("good");
     }
-    public void activateRole(List<PlayerWrapper> playersWrappers) {
-        Player target = this.getPlayer().getRoleUsed();
-        getPlayer().getRoleUsed(target.getAlignment());
+    public String activateRole(List<PlayerWrapper> playersWrappers) {
+        PlayerWrapper target = getPlayerWrapper(getPlayerFromName(this.getPlayer().getRoleUsed(), playersWrappers), playersWrappers);
+        getPlayer().getRoleUsed(target.getPlayerGameStatus().getAlignment());
+        return this.getPlayer().getName()+" learned alignment of "+target.getPlayer().getName()+": "+target.getPlayerGameStatus().getAlignment();
     }
 }
 class Don extends Role{
-    Don(){super();setRole("Don");
+    Don(){super();setRole("main.Don");
         setAlignment("evil");}
     Don( Player player){
         super( player);
-        setRole("Don");
+        setRole("main.Don");
         setAlignment("evil");
     }
-    public void activateRole(List<PlayerWrapper> playersWrappers) {
-        Player target = this.getPlayer().getRoleUsed();
-        PlayerWrapper targetWrapper = getPlayerWrapper(target, playersWrappers);
-        targetWrapper.getPlayerGameStatus().kill();
+    public String activateRole(List<PlayerWrapper> playersWrappers) {
+        PlayerWrapper targetWrapper = getTargetPlayerWrapper(playersWrappers);
+        return this.getPlayer().getName()+" "+ targetWrapper.getPlayerGameStatus().kill();
+
     }
 }
 class Evil extends Role{
-    Evil(){super();setRole("Evil");
+    Evil(){super();setRole("main.Evil");
         setAlignment("evil");}
     Evil(Player player){
         super( player);
-        setRole("Evil");
+        setRole("main.Evil");
         setAlignment("evil");
     }
-    public void activateRole(List<PlayerWrapper> playersWrappers) {
-    }
+    public String activateRole(List<PlayerWrapper> playersWrappers) {return "";}
 }
 class Good extends Role{
-    Good(){super();setRole("Good");
+    Good(){super();setRole("main.Good");
         setAlignment("good");}
     Good(Player player){
         super(player);
-        setRole("Good");
+        setRole("main.Good");
         setAlignment("good");
     }
-    public void activateRole(List<PlayerWrapper> playersWrappers) {}
+    public String activateRole(List<PlayerWrapper> playersWrappers) {return "";}
 }
 class Doctor extends Role{
-    Doctor(){super();setRole("Doctor");
+    Doctor(){super();setRole("main.Doctor");
         setAlignment("good");}
     Doctor(Player player){
         super( player);
-        setRole("Doctor");
+        setRole("main.Doctor");
         setAlignment("good");
     }
-    public void activateRole(List<PlayerWrapper> playersWrappers) {
-        Player target = this.getPlayer().getRoleUsed();
-        PlayerWrapper targetWrapper = getPlayerWrapper(target, playersWrappers);
-        targetWrapper.getPlayerGameStatus().setDocProt(true);
+    public String activateRole(List<PlayerWrapper> playersWrappers) {
+        PlayerWrapper targetWrapper = getTargetPlayerWrapper(playersWrappers);
+        return this.getPlayer().getName()+" "+targetWrapper.getPlayerGameStatus().setDocProt(true);
     }
 }
 class Lover extends Role{
-    Lover(){super();setRole("Lover");
+    Lover(){super();setRole("main.Lover");
         setAlignment("good");}
     Lover(Player player){
         super( player);
-        setRole("Lover");
+        setRole("main.Lover");
         setAlignment("good");
     }
-    public void activateRole(List<PlayerWrapper> playersWrappers) {
+    public String activateRole(List<PlayerWrapper> playersWrappers) {
         PlayerWrapper targetWrapper = getTargetPlayerWrapper(playersWrappers);
-        targetWrapper.getPlayerGameStatus().setLoverSkip(true);
+        return this.getPlayer().getName()+" "+targetWrapper.getPlayerGameStatus().setLoverSkip(true);
+
     }
 }

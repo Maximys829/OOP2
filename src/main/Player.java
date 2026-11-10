@@ -1,7 +1,9 @@
+package main;
+
 import java.util.ArrayList;
 import java.util.List;
 
-class Player {
+public abstract class Player {
     private String alignment;
     private String role;
     private List<Status> statuses;
@@ -80,11 +82,19 @@ class Player {
     public Player getOpinionOnNominated(List<Player> players) {
         return null;
     }
-    public Player getRoleUsed(){
-        return null;
-    }
-    public void getRoleUsed(String info) {}
+    abstract public String getRoleUsed();
+    abstract public void getRoleUsed(String info);
     public String getRole() {
         return role;
+    }
+    public List<Status> getStatuses() {
+        return statuses;
+    }
+    @Override
+    public boolean equals(Object o) {
+        if(o instanceof Player) {
+            return name.equals(((Player)o).name);
+        }
+        return false;
     }
 }

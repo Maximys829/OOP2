@@ -1,14 +1,17 @@
+package main;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-class Status {
+public class Status {
     private double suspicion;//-1 -- 1
     private String name;
     private List<String> nominations = new ArrayList<>();
     private List<HashMap<String, Double>> accusations = new ArrayList<>();
+    private boolean alive = true;
 
-    Status(double suspicion, String name) {
+    public Status(double suspicion, String name) {
         this.name = name;
         this.suspicion = suspicion;
     }
@@ -44,4 +47,12 @@ class Status {
     public void addAccusation(HashMap<String, Double> accusation) {
         accusations.add(accusation);
     }
+
+    public boolean isAlive() {
+        return alive;
+    }
+    public void setAlive(boolean alive) {
+        this.alive = alive;
+    }
+
 }

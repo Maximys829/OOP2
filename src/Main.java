@@ -1,37 +1,13 @@
+import bots.BotRandom;
+import main.*;
+
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.*;
 
-interface checking {
-    public boolean check(Player player);
-}
-
-interface saving {
-    public void save(Player player);
-}
-
-interface whoring {
-    public void smh(Player player);
-}
-
-interface killing {
-    public void kill(Player player);
-}
-
-class BotRandom extends Player {
-    private Random rand = new Random();
-
-    public BotRandom(String name, String role, String alignment) {
-        super(name, role, alignment);
-    }
-
-    public boolean vote(Player player) {
-        return false;
-    }
-}
-
 class Game {
-    private Random random = new Random(1);
+    private Long seed = (long) 1.;
+    private Random random = new Random(seed);
     private int cnt;
     private List<String> wakeOrder = new ArrayList<>();
     private List<PlayerWrapper> playersWrappers;
@@ -39,9 +15,10 @@ class Game {
     private Cond cond = new Cond();
     private RecordsObj records = new RecordsObj();
     private int dayCnt = 1;
-    private Path pathConfig = Path.of("config/gameConfig.txt");
-    private Path pathWakeOrder = Path.of("config/gameWakeOrder.txt");
+    private Path pathConfig = Path.of("src/config/gameConfig.txt");
+    private Path pathWakeOrder = Path.of("src/config/gameWakeOrder.txt");
     private Scanner scanner = new Scanner(pathConfig);
+    private GameLog gameLog = new GameLog();
     public Game() throws IOException {
         cnt = scanner.nextInt();
         playersWrappers = new ArrayList<PlayerWrapper>();
@@ -50,7 +27,7 @@ class Game {
             String roleS = scanner.next();
             for (int i = 0; i < n; i++) {
                 Role role = Role.parseRole(roleS);
-                Player p1 = new Player("Player", roleS, role.getAlignment());
+                Player p1 = new BotRandom("Player", roleS, role.getAlignment(), seed);
                 role.setPlayer(p1);
                 role.setPlayerGameStatus(new PlayerGameStatus(p1));
                 PlayerWrapper pw = new PlayerWrapper(p1, role);
@@ -62,6 +39,14 @@ class Game {
         for (int i = 0; i < cnt; i++) {
             playersWrappers.get(i).getPlayer().setName("Player " + i);
             players.add(playersWrappers.get(i).getPlayer());
+        }
+        for (int i = 0; i < cnt; i++) {
+            Player p1 = playersWrappers.get(i).getPlayer();
+            List<Status> statuses1 = new ArrayList<>();
+            for (int j = 0; j < cnt; j++) {
+                statuses1.add(new Status(0, players.get(j).getName()));
+            }
+            p1.setStatuses(statuses1);
         }
         scanner.close();
         scanner = new Scanner(pathWakeOrder);
@@ -86,9 +71,13 @@ class Game {
                     break;
                 case "nominations":
                     nominations();
+                    System.out.println(dayCnt+" noms ended");
                     break;
                 case "night":
                     night();
+                    gameLog.addLog("Ended day "+dayCnt);
+                    printTable();
+                    dayCnt++;
                     break;
             }
             if(aliveCounter()<=aliveEvilCounter()*2){
@@ -101,6 +90,7 @@ class Game {
             updateStatuses();
             cond.advanceDay();
         }
+        gameLog.printLog();
     }
 
     public void morning() {
@@ -135,24 +125,33 @@ class Game {
             if (drawed.size() > 1) {
                 records.addRecord("draw", "None", 0, "None");
             }
-        } else {
+        } else if (drawed.size() == 1) {
             getPlayerWrapper(drawed.getFirst()).getPlayerGameStatus().kill();
             records.addRecord("execution", "None", 0, drawed.getFirst().getName());
+        } else {
+            records.addRecord("no executions", "None", 0, "None");
         }
     }
 
     public HashMap<Player, Integer> getVotesOn(List<Player> nominatedPlayers) {
         HashMap<Player, Integer> votes = new HashMap<>();
+        if (nominatedPlayers.isEmpty()){
+            return votes;
+        }
         for (PlayerWrapper player : playersWrappers) {
             if (!player.getPlayerGameStatus().isAlive()) {
                 continue;
             }
             Player attacked = player.getPlayer().getOpinionOnNominated(nominatedPlayers);
+            if (attacked == null) {
+                attacked = nominatedPlayers.get(nominatedPlayers.size() - 1);
+            }
             if (!votes.containsKey(attacked)) {
                 votes.put(attacked, 0);
             }
             votes.put(attacked, votes.get(attacked) + 1);
         }
+        System.out.println(votes);
         return votes;
     }
 
@@ -172,7 +171,13 @@ class Game {
         return drawed;
     }
     public void night() {
-        // to do: activate all roles in order
+        for(String roleS : wakeOrder){
+            for (PlayerWrapper playerWrapper : playersWrappers) {
+                if (playerWrapper.getPlayer().getRole().equals(roleS)) {
+                    playerWrapper.getRole().tryToActivateRole(playersWrappers, gameLog);
+                }
+            }
+        }
     }
     public void updateStatuses() {
         for (Player player : players) {
@@ -204,9 +209,10 @@ class Game {
         }
         return voteCnt;
     }
-
-    public void execute(Player player) {
-
+    public void printTable(){
+        for (Player player : players) {
+            System.out.println(player.getName()+" "+player.getRole()+" "+(player.isAlive()? "alive" : "dead"));
+        }
     }
 }
 
@@ -220,7 +226,11 @@ class Cond {
     }
 
     public void advanceDay() {
-        step = step + 1 == conds.length ? 0 : step + 1;
+        if(step==conds.length-1){
+            step = 0;
+        } else {
+            step++;
+        }
         condition = conds[step];
     }
 

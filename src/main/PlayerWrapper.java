@@ -1,4 +1,6 @@
-class PlayerWrapper {
+package main;
+
+public class PlayerWrapper {
     private Player player;
     private Role role;
     public PlayerWrapper(Player player, Role role) {
