@@ -121,7 +121,6 @@ class Don extends Role{
     public String activateRole(List<PlayerWrapper> playersWrappers) {
         PlayerWrapper targetWrapper = getTargetPlayerWrapper(playersWrappers);
         return this.getPlayer().getName()+" "+ targetWrapper.getPlayerGameStatus().kill();
-
     }
 }
 class Evil extends Role{

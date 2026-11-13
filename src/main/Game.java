@@ -58,6 +58,7 @@ public class Game {
             wakeOrder.add(roleS);
         }
     }
+
     public static PlayerWrapper getWiredTestWrapper(String name, String roleS) {
         Role role = Role.parseRole(roleS);
         Player p1 = new BotTest(name, roleS, role.getAlignment());
@@ -66,6 +67,7 @@ public class Game {
         PlayerWrapper pw = new PlayerWrapper(p1, role);
         return pw;
     }
+
     public PlayerWrapper getPlayerWrapper(Player player) {
         for (PlayerWrapper p : playersWrappers) {
             if (p.getPlayer().equals(player)) {
@@ -144,6 +146,9 @@ public class Game {
             }
         } else if (drawed.size() == 1) {
             getPlayerWrapper(drawed.getFirst()).getPlayerGameStatus().kill();
+            if (drawed.getFirst().getRole().equals("Don")) {
+                changeDon();
+            }
             records.addRecord("execution", "None", 0, drawed.getFirst().getName());
         } else {
             records.addRecord("no executions", "None", 0, "None");
@@ -195,6 +200,9 @@ public class Game {
                     playerWrapper.getRole().tryToActivateRole(playersWrappers, gameLog);
                 }
             }
+        }
+        if(roleIsDead("Don")){
+            changeDon();
         }
     }
 
@@ -262,6 +270,25 @@ public class Game {
                 }
             }
         }
+    }
+    public void changeDon(){
+        for (PlayerWrapper pw : playersWrappers) {
+            if (pw.getRole().getRole().equals("evil") && pw.getPlayerGameStatus().isAlive()) {
+                Role role = Role.parseRole("Don");
+                role.setPlayer(pw.getPlayer());
+                role.setPlayerGameStatus(pw.getPlayerGameStatus());
+                pw.setRole(role);
+                break;
+            }
+        }
+    }
+    public boolean roleIsDead(String role) {
+        for (PlayerWrapper pw : playersWrappers) {
+            if (pw.getRole().getRole().equals(role)&& pw.getPlayerGameStatus().isAlive()) {
+                return false;
+            }
+        }
+        return true;
     }
 }
 

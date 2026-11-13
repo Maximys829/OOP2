@@ -62,7 +62,9 @@ public abstract class Player {
         }
         return null;
     }
-
+    final public void setRole(String role) {
+        this.role = role;
+    }
     final public String getName() {
         return name;
     }

@@ -16,4 +16,8 @@ public class PlayerWrapper {
     public PlayerGameStatus getPlayerGameStatus() {
         return role.getPlayerGameStatus();
     }
+    public void setRole(Role role) {
+        this.role = role;
+        this.player.setRole(role.getRole());
+    }
 }
