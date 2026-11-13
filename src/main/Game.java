@@ -1,11 +1,13 @@
+package main;
+
 import bots.BotRandom;
-import main.*;
+import bots.BotTest;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.*;
 
-class Game {
+public class Game {
     private Long seed = (long) 1.;
     private Random random = new Random(seed);
     private int cnt;
@@ -19,6 +21,7 @@ class Game {
     private Path pathWakeOrder = Path.of("src/config/gameWakeOrder.txt");
     private Scanner scanner = new Scanner(pathConfig);
     private GameLog gameLog = new GameLog();
+
     public Game() throws IOException {
         cnt = scanner.nextInt();
         playersWrappers = new ArrayList<PlayerWrapper>();
@@ -55,6 +58,14 @@ class Game {
             wakeOrder.add(roleS);
         }
     }
+    public static PlayerWrapper getWiredTestWrapper(String name, String roleS) {
+        Role role = Role.parseRole(roleS);
+        Player p1 = new BotTest(name, roleS, role.getAlignment());
+        role.setPlayer(p1);
+        role.setPlayerGameStatus(new PlayerGameStatus(p1));
+        PlayerWrapper pw = new PlayerWrapper(p1, role);
+        return pw;
+    }
     public PlayerWrapper getPlayerWrapper(Player player) {
         for (PlayerWrapper p : playersWrappers) {
             if (p.getPlayer().equals(player)) {
@@ -63,6 +74,7 @@ class Game {
         }
         return null;
     }
+
     public void play() {
         while (true) {
             switch (cond.getCondition()) {
@@ -71,24 +83,24 @@ class Game {
                     break;
                 case "nominations":
                     nominations();
-                    System.out.println(dayCnt+" noms ended");
+                    System.out.println(dayCnt + " noms ended");
                     registerDeaths();
                     break;
                 case "night":
-                    if(dayCnt==1){
+                    if (dayCnt == 1) {
                         firstNight();
                     }
                     night();
-                    gameLog.addLog("Ended day "+dayCnt);
+                    gameLog.addLog("Ended day " + dayCnt);
                     printTable();
                     dayCnt++;
                     registerDeaths();
                     break;
             }
-            if(aliveCounter()<=aliveEvilCounter()*2){
+            if (aliveCounter() <= aliveEvilCounter() * 2) {
                 System.out.println("EVIL WON");
                 break;
-            } else if (aliveEvilCounter()==0){
+            } else if (aliveEvilCounter() == 0) {
                 System.out.println("GOOD WON");
                 break;
             }
@@ -140,7 +152,7 @@ class Game {
 
     public HashMap<Player, Integer> getVotesOn(List<Player> nominatedPlayers) {
         HashMap<Player, Integer> votes = new HashMap<>();
-        if (nominatedPlayers.isEmpty()){
+        if (nominatedPlayers.isEmpty()) {
             return votes;
         }
         for (PlayerWrapper player : playersWrappers) {
@@ -175,8 +187,9 @@ class Game {
         }
         return drawed;
     }
+
     public void night() {
-        for(String roleS : wakeOrder){
+        for (String roleS : wakeOrder) {
             for (PlayerWrapper playerWrapper : playersWrappers) {
                 if (playerWrapper.getPlayer().getRole().equals(roleS)) {
                     playerWrapper.getRole().tryToActivateRole(playersWrappers, gameLog);
@@ -184,11 +197,12 @@ class Game {
             }
         }
     }
-    public void firstNight(){
+
+    public void firstNight() {
         StringBuilder s = new StringBuilder("evil:");
         List<Player> evilPlayers = new ArrayList<>();
-        for(PlayerWrapper playerWrapper : playersWrappers){
-            if(playerWrapper.getPlayer().getAlignment().equals("evil")){
+        for (PlayerWrapper playerWrapper : playersWrappers) {
+            if (playerWrapper.getPlayer().getAlignment().equals("evil")) {
                 s.append(" ").append(playerWrapper.getPlayer().getName());
                 evilPlayers.add(playerWrapper.getPlayer());
             }
@@ -199,12 +213,14 @@ class Game {
         }
 
     }
+
     public void updateStatuses() {
         for (Player player : players) {
             player.updateStatuses(records);
         }
     }
-    public int aliveCounter(){
+
+    public int aliveCounter() {
         int aliveCnt = 0;
         for (Player player : players) {
             if (player.isAlive()) {
@@ -213,15 +229,17 @@ class Game {
         }
         return aliveCnt;
     }
-    public int aliveEvilCounter(){
+
+    public int aliveEvilCounter() {
         int aliveCnt = 0;
         for (Player player : players) {
-            if (player.isAlive()&& Objects.equals(player.getAlignment(), "evil")) {
+            if (player.isAlive() && Objects.equals(player.getAlignment(), "evil")) {
                 aliveCnt++;
             }
         }
         return aliveCnt;
     }
+
     public int playNomination(Player nominated) {
         int voteCnt = 0;
         for (Player player : players) {
@@ -229,15 +247,17 @@ class Game {
         }
         return voteCnt;
     }
-    public void printTable(){
+
+    public void printTable() {
         for (Player player : players) {
-            System.out.println(player.getName()+" "+player.getRole()+" "+(player.isAlive()? "alive" : "dead"));
+            System.out.println(player.getName() + " " + player.getRole() + " " + (player.isAlive() ? "alive" : "dead"));
         }
     }
-    public void registerDeaths(){
+
+    public void registerDeaths() {
         for (PlayerWrapper playerWrapper : playersWrappers) {
             if (!playerWrapper.getPlayer().isAlive()) {
-                if(!records.playerIsDead(playerWrapper.getPlayer().getName())){
+                if (!records.playerIsDead(playerWrapper.getPlayer().getName())) {
                     records.addRecord("death", playerWrapper.getPlayer().getName(), 0, "");
                 }
             }
@@ -255,7 +275,7 @@ class Cond {
     }
 
     public void advanceDay() {
-        if(step==conds.length-1){
+        if (step == conds.length - 1) {
             step = 0;
         } else {
             step++;
