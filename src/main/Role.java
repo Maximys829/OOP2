@@ -29,7 +29,7 @@ public abstract class Role{
     Role(){}
     final public void tryToActivateRole(List<PlayerWrapper> playersWrappers, GameLog log){
         if(this.getPlayerGameStatus().isHealthy()&&this.getPlayerGameStatus().isAlive()){
-            log.addLog(activateRole(playersWrappers));
+            log.addLog(activateRole(playersWrappers), this.player.getName());
         }
     }
     abstract public String activateRole(List<PlayerWrapper> playersWrappers);

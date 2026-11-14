@@ -122,6 +122,10 @@ public class Game {
             cond.advanceDay();
         }
         //gameLog.printLog();
+//        for (PlayerWrapper p : playersWrappers) {
+//            System.out.println(p.getPlayer().getName());
+//            gameLog.printLogForPlayer(p.getPlayer().getName());
+//        }
         return goodWin;
     }
 
@@ -305,7 +309,6 @@ public class Game {
                 role.setPlayer(pw.getPlayer());
                 role.setPlayerGameStatus(pw.getPlayerGameStatus());
                 pw.setRole(role);
-
                 break;
             }
         }
