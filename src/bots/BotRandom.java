@@ -27,6 +27,21 @@ public class BotRandom extends Player {
                 }
         }
     }
+
+    public List<String> getNominations() {
+        List<String> nominations = new ArrayList<>();
+        Status randomStatus = getStatuses().get(rand.nextInt(getStatuses().size()));
+        while (randomStatus.getSuspicion() < -0.99|| !randomStatus.isAlive()) {
+            randomStatus = getStatuses().get(rand.nextInt(getStatuses().size()));
+        }
+        nominations.add(randomStatus.getName());
+        return nominations;
+    }
+
+    public String getOpinionOnNominated(List<String> playerNames) {
+        return playerNames.get(rand.nextInt(playerNames.size()));
+    }
+
     public String getRoleUsed(){
         List<Status> statusesPriority = new ArrayList<Status>();
         List<Status> statusesNotPriority = new ArrayList<>();

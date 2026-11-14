@@ -6,7 +6,7 @@ import java.util.List;
 public abstract class Player {
     private String alignment;
     private String role;
-    private List<Status> statuses;
+    private List<Status> statuses = new ArrayList<>();
     private String name;
     private boolean alive = true;
 
@@ -21,13 +21,6 @@ public abstract class Player {
     }
     public final void setAlive(boolean alive) {
         this.alive = alive;
-    }
-    public boolean vote(Player player) {
-        return false;
-    }
-
-    public List<Player> getPlayersToVote() {
-        return new ArrayList<>();
     }
 
     public void setStatuses(List<Status> statuses) {
@@ -75,21 +68,14 @@ public abstract class Player {
         return alignment;
     }
 
-    public Player getNomination() {
-        return null;
-    }
+    abstract public List<String> getNominations();
 
-    public List<Player> getNominations() {
-        return new ArrayList<>();
-    }
+    //public boolean getOpinionOnNominated(Player player) {
+        //return false;
+    //}
 
-    public boolean getOpinionOnNominated(Player player) {
-        return false;
-    }
+    abstract public String getOpinionOnNominated(List<String> playerNames);
 
-    public Player getOpinionOnNominated(List<Player> players) {
-        return null;
-    }
     abstract public String getRoleUsed();
     abstract public void getRoleUsed(String info);
     public String getRole() {
@@ -104,5 +90,9 @@ public abstract class Player {
             return name.equals(((Player)o).name);
         }
         return false;
+    }
+    @Override
+    public String toString() {
+        return name;
     }
 }

@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.util.*;
 
 public class Game {
+    private boolean goodWin = false;
     private Long seed = (long) 1.;
     private Random random = new Random(seed);
     private int cnt;
@@ -59,6 +60,21 @@ public class Game {
         }
     }
 
+    public Game(List<PlayerWrapper> playersWrappers) throws IOException {
+        this.playersWrappers = playersWrappers;
+        scanner.close();
+        scanner = new Scanner(pathWakeOrder);
+        while (scanner.hasNext()) {
+            String roleS = scanner.next();
+            wakeOrder.add(roleS);
+        }
+        this.cnt = playersWrappers.size();
+        players = new ArrayList<>();
+        for (int i = 0; i < cnt; i++) {
+            players.add(playersWrappers.get(i).getPlayer());
+        }
+    }
+
     public static PlayerWrapper getWiredTestWrapper(String name, String roleS) {
         Role role = Role.parseRole(roleS);
         Player p1 = new BotTest(name, roleS, role.getAlignment());
@@ -77,7 +93,7 @@ public class Game {
         return null;
     }
 
-    public void play() {
+    public boolean play() {
         while (true) {
             switch (cond.getCondition()) {
                 case "morning":
@@ -99,17 +115,14 @@ public class Game {
                     registerDeaths();
                     break;
             }
-            if (aliveCounter() <= aliveEvilCounter() * 2) {
-                System.out.println("EVIL WON");
-                break;
-            } else if (aliveEvilCounter() == 0) {
-                System.out.println("GOOD WON");
+            if (checkWin()) {
                 break;
             }
             updateStatuses();
             cond.advanceDay();
         }
-        gameLog.printLog();
+        //gameLog.printLog();
+        return goodWin;
     }
 
     public void morning() {
@@ -125,7 +138,7 @@ public class Game {
             if (!player.getPlayer().isAlive()) {
                 continue;
             }
-            List<Player> nominated = player.getPlayer().getNominations();
+            List<Player> nominated = getPlayersByNames(player.getPlayer().getNominations());
             for (Player nominatedPlayer : nominated) {
                 if (!nominatedPlayers.contains(nominatedPlayer)) {
                     nominatedPlayers.add(nominatedPlayer);
@@ -143,6 +156,13 @@ public class Game {
             drawed = getMaxedNominated(votes);
             if (drawed.size() > 1) {
                 records.addRecord("draw", "None", 0, "None");
+                gameLog.addLog("Draw between " + drawed.toString());
+            } else {
+                getPlayerWrapper(drawed.getFirst()).getPlayerGameStatus().kill();
+                if (drawed.getFirst().getRole().equals("Don")) {
+                    changeDon();
+                }
+                gameLog.addLog("Executed " + drawed.toString());
             }
         } else if (drawed.size() == 1) {
             getPlayerWrapper(drawed.getFirst()).getPlayerGameStatus().kill();
@@ -150,8 +170,10 @@ public class Game {
                 changeDon();
             }
             records.addRecord("execution", "None", 0, drawed.getFirst().getName());
+            gameLog.addLog("Executed " + drawed.getFirst().getName());
         } else {
             records.addRecord("no executions", "None", 0, "None");
+            gameLog.addLog("No nominations");
         }
     }
 
@@ -164,9 +186,13 @@ public class Game {
             if (!player.getPlayerGameStatus().isAlive()) {
                 continue;
             }
-            Player attacked = player.getPlayer().getOpinionOnNominated(nominatedPlayers);
+            PlayerWrapper attackedW = getPlayerWrapperByName(player.getPlayer().getOpinionOnNominated(getPlayerNames(nominatedPlayers)));
+            Player attacked = null;
+            if (attackedW != null) {
+                attacked = attackedW.getPlayer();
+            }
             if (attacked == null) {
-                attacked = nominatedPlayers.get(nominatedPlayers.size() - 1);
+                attacked = nominatedPlayers.getLast();
             }
             if (!votes.containsKey(attacked)) {
                 votes.put(attacked, 0);
@@ -201,7 +227,7 @@ public class Game {
                 }
             }
         }
-        if(roleIsDead("Don")){
+        if (roleIsDead("Don")) {
             changeDon();
         }
     }
@@ -248,13 +274,13 @@ public class Game {
         return aliveCnt;
     }
 
-    public int playNomination(Player nominated) {
-        int voteCnt = 0;
-        for (Player player : players) {
-            voteCnt += player.getOpinionOnNominated(nominated) ? 1 : 0;
-        }
-        return voteCnt;
-    }
+//    public int playNomination(Player nominated) {
+//        int voteCnt = 0;
+//        for (Player player : players) {
+//            voteCnt += player.getOpinionOnNominated(nominated) ? 1 : 0;
+//        }
+//        return voteCnt;
+//    }
 
     public void printTable() {
         for (Player player : players) {
@@ -271,24 +297,67 @@ public class Game {
             }
         }
     }
-    public void changeDon(){
+
+    public void changeDon() {
         for (PlayerWrapper pw : playersWrappers) {
-            if (pw.getRole().getRole().equals("evil") && pw.getPlayerGameStatus().isAlive()) {
+            if (pw.getRole().getRole().equals("Evil") && pw.getPlayerGameStatus().isAlive()) {
                 Role role = Role.parseRole("Don");
                 role.setPlayer(pw.getPlayer());
                 role.setPlayerGameStatus(pw.getPlayerGameStatus());
                 pw.setRole(role);
+
                 break;
             }
         }
     }
+
     public boolean roleIsDead(String role) {
         for (PlayerWrapper pw : playersWrappers) {
-            if (pw.getRole().getRole().equals(role)&& pw.getPlayerGameStatus().isAlive()) {
+            if (pw.getRole().getRole().equals(role) && pw.getPlayerGameStatus().isAlive()) {
                 return false;
             }
         }
         return true;
+    }
+
+    public List<String> getPlayerNames(List<Player> players) {
+        List<String> playerNames = new ArrayList<>();
+        for (Player player : players) {
+            playerNames.add(player.getName());
+        }
+        return playerNames;
+    }
+
+    public PlayerWrapper getPlayerWrapperByName(String playerName) {
+        for (PlayerWrapper pw : playersWrappers) {
+            if (pw.getPlayer().getName().equals(playerName)) {
+                return pw;
+            }
+        }
+        return null;
+    }
+
+    public List<Player> getPlayersByNames(List<String> playerNames) {
+        List<Player> players = new ArrayList<>();
+        for (PlayerWrapper pw : playersWrappers) {
+            if (playerNames.contains(pw.getPlayer().getName())) {
+                players.add(pw.getPlayer());
+            }
+        }
+        return players;
+    }
+
+    public boolean checkWin() {
+        if (aliveCounter() <= aliveEvilCounter() * 2) {
+            gameLog.addLog("EVIL WON");
+            goodWin = false;
+            return true;
+        } else if (aliveEvilCounter() == 0) {
+            gameLog.addLog("GOOD WON");
+            goodWin = true;
+            return true;
+        }
+        return false;
     }
 }
 

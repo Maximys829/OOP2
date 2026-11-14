@@ -2,19 +2,19 @@ package main;
 
 import java.util.List;
 interface checking {
-    public boolean check(Player player);
+    public String check(PlayerWrapper player);
 }
 
 interface saving {
-    public void save(Player player);
+    public String save(List<PlayerWrapper> playersWrappers);
 }
 
-interface whoring {
-    public void smh(Player player);
+interface blocking {
+    public String block(List<PlayerWrapper> playersWrappers);
 }
 
 interface killing {
-    public void kill(Player player);
+    public String kill(List<PlayerWrapper> playersWrappers);
 }
 
 public abstract class Role{
@@ -95,7 +95,7 @@ public abstract class Role{
     }
 }
 
-class Comissar extends Role{
+class Comissar extends Role implements checking{
     Comissar(){super();
         setRole("Comissar");
         setAlignment("good");}
@@ -106,11 +106,17 @@ class Comissar extends Role{
     }
     public String activateRole(List<PlayerWrapper> playersWrappers) {
         PlayerWrapper target = getPlayerWrapper(getPlayerFromName(this.getPlayer().getRoleUsed(), playersWrappers), playersWrappers);
+        return check(target);
+
+    }
+
+    @Override
+    public String check(PlayerWrapper target) {
         getPlayer().getRoleUsed(target.getPlayerGameStatus().getAlignment());
         return this.getPlayer().getName()+" learned alignment of "+target.getPlayer().getName()+": "+target.getPlayerGameStatus().getAlignment();
     }
 }
-class Don extends Role{
+class Don extends Role implements killing{
     Don(){super();setRole("Don");
         setAlignment("evil");}
     Don( Player player){
@@ -119,6 +125,11 @@ class Don extends Role{
         setAlignment("evil");
     }
     public String activateRole(List<PlayerWrapper> playersWrappers) {
+        return kill(playersWrappers);
+    }
+
+    @Override
+    public String kill(List<PlayerWrapper> playersWrappers) {
         PlayerWrapper targetWrapper = getTargetPlayerWrapper(playersWrappers);
         return this.getPlayer().getName()+" "+ targetWrapper.getPlayerGameStatus().kill();
     }
@@ -143,7 +154,7 @@ class Good extends Role{
     }
     public String activateRole(List<PlayerWrapper> playersWrappers) {return "";}
 }
-class Doctor extends Role{
+class Doctor extends Role implements saving{
     Doctor(){super();setRole("Doctor");
         setAlignment("good");}
     Doctor(Player player){
@@ -152,11 +163,14 @@ class Doctor extends Role{
         setAlignment("good");
     }
     public String activateRole(List<PlayerWrapper> playersWrappers) {
+        return save(playersWrappers);
+    }
+    public String save(List<PlayerWrapper> playersWrappers) {
         PlayerWrapper targetWrapper = getTargetPlayerWrapper(playersWrappers);
         return this.getPlayer().getName()+" "+targetWrapper.getPlayerGameStatus().setDocProt(true);
     }
 }
-class Lover extends Role{
+class Lover extends Role implements blocking{
     Lover(){super();setRole("Lover");
         setAlignment("good");}
     Lover(Player player){
@@ -165,8 +179,10 @@ class Lover extends Role{
         setAlignment("good");
     }
     public String activateRole(List<PlayerWrapper> playersWrappers) {
+        return block(playersWrappers);
+    }
+    public String block(List<PlayerWrapper> playersWrappers) {
         PlayerWrapper targetWrapper = getTargetPlayerWrapper(playersWrappers);
         return this.getPlayer().getName()+" "+targetWrapper.getPlayerGameStatus().setLoverSkip(true);
-
     }
 }
